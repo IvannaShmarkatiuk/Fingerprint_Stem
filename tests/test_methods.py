@@ -18,7 +18,7 @@ from fp.methods.thinning import zhang_suen, zhang_suen_naive
 from fp.synthetic import stripes
 
 
-# ---------- базові операції ----------
+#базові операції
 
 def test_conv2d_identity_and_sum():
     img = np.arange(9, dtype=float).reshape(3, 3)
@@ -41,7 +41,7 @@ def test_to_gray_weights():
     assert np.allclose(to_gray(rgb), 29.9)  # 0.299 * 100
 
 
-# ---------- CLAHE (гістограмна корекція) ----------
+#CLAHE (гістограмна корекція) 
 
 def test_clahe_one_tile_equals_histogram_equalization():
     # 4 рівні по 4 пікселі: CDF = 4, 8, 12, 16; LUT = (CDF-4)/(16-4)*255
@@ -56,7 +56,7 @@ def test_clahe_constant_image_stays_constant():
     assert np.ptp(out) < 1e-9
 
 
-# ---------- поле орієнтацій і Габор (фільтрація) ----------
+#  поле орієнтацій і Габор (фільтрація) 
 
 def test_gradients_ramp():
     img = np.array([[0, 1, 2], [0, 1, 2], [0, 1, 2]], dtype=float)
@@ -97,7 +97,7 @@ def test_gabor_prefers_matching_orientation():
     assert np.abs(good[16:32, 16:32]).mean() > 5 * np.abs(bad[16:32, 16:32]).mean()
 
 
-# ---------- Оцу і Sauvola (сегментація) ----------
+# Оцу і Sauvola (сегментація) 
 
 def test_otsu_two_levels():
     # будь-який поріг 10..199 розділяє ідеально; argmax повертає перший - 10
@@ -122,7 +122,7 @@ def test_sauvola_threshold_by_hand():
     assert t[0, 0] == pytest.approx(80.0)  # однорідна ділянка: T = 100 * (1 - 0.2)
 
 
-# ---------- морфологія ----------
+#морфологія 
 
 def test_erode_dilate_cross():
     m = np.zeros((5, 5), dtype=bool)
@@ -167,7 +167,7 @@ def test_zhang_suen_thick_bar_to_line():
     assert (zhang_suen_naive(m) == skel).all()
 
 
-# ---------- мінуції (ключові точки) ----------
+# мінуції (ключові точки) 
 
 def test_crossing_number_y_shape():
     s = np.zeros((7, 7), dtype=bool)
@@ -192,7 +192,7 @@ def test_extract_minutiae_line_ending():
     assert found == [(20, 19, "E")]
 
 
-# ---------- ROI і нормалізація (аналіз текстур) ----------
+#ROI і нормалізація (аналіз текстур) 
 
 def test_block_stats_by_hand():
     img = np.array([[0, 2, 5, 5], [2, 0, 5, 5], [1, 1, 1, 1], [1, 1, 1, 1]], dtype=float)
@@ -216,7 +216,7 @@ def test_normalize_mean_and_variance():
     assert out.var() == pytest.approx(400)
 
 
-# ---------- FFT (перетворення Фур'є) ----------
+#FFT (перетворення Фур'є)
 
 def test_fft_by_hand():
     assert np.allclose(fft1([1, 0, 0, 0]), [1, 1, 1, 1])
