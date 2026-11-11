@@ -1,0 +1,1 @@
+Fingerprint image enhancement and minutiae extraction with classical image processing, implemented from scratch in NumPy. Two pipelines (Gabor and Fourier) are compared on FVC2002 for accuracy and noise robustness.

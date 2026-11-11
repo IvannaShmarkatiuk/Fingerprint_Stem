@@ -1,0 +1,66 @@
+seed: 42
+
+paths:
+  input: data/synthetic        # для FVC2002: data/fvc2002
+  output: results
+
+p1:
+  clahe:
+    tiles: 8          # сітка плиток 8x8
+    clip_limit: 2.0   # обмеження контрасту (у разах від середньої висоти стовпця)
+  gabor:
+    orient_window: 17   # вікно структурного тензора, px
+    orient_smooth: 33   # вікно згладжування поля орієнтацій, px
+    estimate_freq: true # оцінювати частоту ліній по зображенню
+    freq: 0.111         # запасна частота ліній (1/9 px для 500 dpi)
+    sigma_x: 4.0        # ширина ядра поперек ліній
+    sigma_y: 3.0        # ширина ядра вздовж ліній (підібрано sweep)
+    n_angles: 16        # кількість квантованих орієнтацій
+    coherence_min: 0.2  # мінімальна когерентність для ROI
+    energy_rel: 0.15    # поріг енергії між 5-м і 95-м процентилем
+  minutiae:
+    border: 12          # відступ від краю ROI, px
+    min_dist: 8         # мінімальна відстань між мінуціями, px
+
+p2:
+  roi:
+    block: 16
+    rel_threshold: 0.35 # std блоку > 0.35 * std зображення
+    mean: 128           # нормалізація: цільове середнє
+    var: 2500           # нормалізація: цільова дисперсія
+  fft:
+    block: 32           # розмір блоку (степінь 2)
+    step: 16            # крок між блоками (перекриття 50%)
+    k: 0.35             # показник підсилення спектра (підібрано sweep)
+    fmin: 0.0625        # смуга частот ліній, цикли/px
+    fmax: 0.25
+  sauvola:
+    window: 15
+    k: 0.1              # підібрано sweep
+    r: 128
+  morph:
+    element: cross      # cross або square
+    size: 3
+  minutiae:
+    border: 12
+    min_dist: 8
+
+experiment:
+  # спотворення для перевірки стійкості
+  degradations:
+    - {type: gaussian, level: 10}
+    - {type: gaussian, level: 20}
+    - {type: gaussian, level: 30}
+    - {type: saltpepper, level: 0.05}
+    - {type: saltpepper, level: 0.10}
+    - {type: light, level: 30}
+    - {type: light, level: 60}
+    - {type: light, level: 90}
+
+  thresholds:
+    ssim: 0.70
+    psnr: 20.0
+    retention: 0.70
+    orientation_deg: 5.0
+    binary_agreement: 0.95
+  threshold_scenarios: [gaussian_10, gaussian_20, saltpepper_0.05]

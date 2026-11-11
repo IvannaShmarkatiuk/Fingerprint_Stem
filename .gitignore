@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+results/
+data/fvc2002/*
+!data/fvc2002/README.md
+.venv/
