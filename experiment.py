@@ -17,7 +17,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from fp.config import load_config, set_by_path
+from fp.config import load_config, project_path, set_by_path
 from fp.io_utils import ImageLoadError, list_images, load_gray
 from fp.methods.minutiae import extract_minutiae, draw_minutiae
 from fp.methods.thinning import zhang_suen
@@ -268,9 +268,9 @@ def main(argv=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     cfg = load_config(args.config, args.set)
-    out = Path(args.out)
+    out = project_path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    files = list_images(args.input or cfg["paths"]["input"])
+    files = list_images(project_path(args.input or cfg["paths"]["input"]))
     if args.limit:
         files = files[:args.limit]
 
@@ -281,10 +281,10 @@ def main(argv=None):
         _, c1 = robustness(cfg, files, out)
         print(json.dumps(c1, ensure_ascii=False, indent=2))
     elif args.mode == "groundtruth":
-        groundtruth(cfg, args.gt, out)
+        groundtruth(cfg, project_path(args.gt), out)
         print((out / "c1_groundtruth.json").read_text(encoding="utf-8"))
     elif args.mode == "sweep":
-        sweep(cfg, args.tune, out)
+        sweep(cfg, project_path(args.tune), out)
     else:
         figures(cfg, files[:args.limit or 3], out)
     log.info("Результати в %s", out)

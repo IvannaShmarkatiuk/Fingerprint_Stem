@@ -53,7 +53,7 @@ def test_degrade_reproducible_with_seed():
     assert 0.07 < np.mean((sp == 0) | (sp == 255)) < 0.13
 
 
-# ---------- пайплайни ----------
+#пайплайни
 
 @pytest.mark.parametrize("name", ["p1", "p2"])
 def test_pipeline_parallel_lines_have_no_minutiae(name, cfg):

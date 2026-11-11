@@ -5,10 +5,10 @@
 Для кожного відбитка зберігається PNG і файл .npz з правильними відповідями.
 """
 import argparse
-from pathlib import Path
 
 import numpy as np
 
+from fp.config import project_path
 from fp.io_utils import save_image
 from fp.synthetic import synth_fingerprint
 
@@ -21,7 +21,7 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=0, help="перший seed (далі seed+1, ...)")
     args = ap.parse_args(argv)
 
-    out = Path(args.out)
+    out = project_path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for i in range(args.count):
         seed = args.seed + i

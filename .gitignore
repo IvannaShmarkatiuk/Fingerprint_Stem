@@ -5,3 +5,4 @@ results/
 data/fvc2002/*
 !data/fvc2002/README.md
 .venv/
+.DS_Store

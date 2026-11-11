@@ -1,7 +1,21 @@
 """Завантаження конфігурації з YAML та перевизначення параметрів з командного рядка."""
 import copy
+from pathlib import Path
 
 import yaml
+
+# Корінь проєкту: папка, де лежать run.py і config.yaml.
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def project_path(path):
+    """Перетворює відносний шлях на шлях від кореня проєкту.
+
+    Так програму можна запускати з будь-якої поточної папки.
+    Абсолютні шляхи повертаються без змін.
+    """
+    p = Path(path).expanduser()
+    return p if p.is_absolute() else PROJECT_ROOT / p
 
 
 def load_config(path, overrides=None):
@@ -9,7 +23,7 @@ def load_config(path, overrides=None):
 
     Значення після "=" розбирається як YAML (числа, true/false, списки).
     """
-    with open(path, encoding="utf-8") as f:
+    with open(project_path(path), encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     cfg = copy.deepcopy(cfg)
     for item in overrides or []:

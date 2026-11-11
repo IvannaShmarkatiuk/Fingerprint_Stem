@@ -9,8 +9,8 @@
 """
 import csv
 import time
-from pathlib import Path
 
+from fp.config import project_path
 from fp.methods.gabor import gabor_filter, gabor_filter_full, gabor_filter_naive
 from fp.methods.orientation import orientation_field
 from fp.methods.otsu import otsu_binarize
@@ -61,7 +61,7 @@ def main():
 
     for r in rows:
         r["seconds"] = round(r["seconds"], 5)
-    out = Path("results")
+    out = project_path("results")
     out.mkdir(exist_ok=True)
     with open(out / "benchmark.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["task", "method", "seconds"])

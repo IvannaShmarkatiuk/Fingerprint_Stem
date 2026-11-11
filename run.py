@@ -10,11 +10,10 @@ import csv
 import json
 import logging
 import sys
-from pathlib import Path
 
 import numpy as np
 
-from fp.config import load_config
+from fp.config import load_config, project_path
 from fp.io_utils import ImageLoadError, list_images, load_gray, save_image
 from fp.methods.minutiae import draw_minutiae
 from fp.metrics import mse, psnr, ssim
@@ -76,8 +75,8 @@ def main(argv=None):
         log.error("Помилка конфігурації: %s", exc)
         return 2
 
-    in_dir = Path(args.input or cfg["paths"]["input"])
-    out_dir = Path(args.output or cfg["paths"]["output"])
+    in_dir = project_path(args.input or cfg["paths"]["input"])
+    out_dir = project_path(args.output or cfg["paths"]["output"])
     names = list(PIPELINES) if args.pipeline == "all" else [args.pipeline]
     files = list_images(in_dir)
     if args.limit:
