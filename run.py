@@ -1,3 +1,10 @@
+"""Головна програма: обробка вибірки обраним пайплайном.
+
+Приклади:
+    python run.py --pipeline all
+    python run.py --pipeline p1 --input data/fvc2002 --limit 20
+    python run.py --pipeline p2 --set p2.sauvola.k=0.3
+"""
 import argparse
 import csv
 import json
@@ -17,6 +24,7 @@ log = logging.getLogger("run")
 
 
 def parse_args(argv=None):
+    """Аргументи командного рядка."""
     ap = argparse.ArgumentParser(description="Обробка відбитків пальців пайплайнами П1/П2")
     ap.add_argument("--pipeline", choices=[*PIPELINES, "all"], default="all")
     ap.add_argument("--config", default="config.yaml")
@@ -30,6 +38,7 @@ def parse_args(argv=None):
 
 
 def process_image(path, names, cfg, out_dir, save_stages):
+    """Обробляє одне зображення всіма обраними пайплайнами, повертає рядки метрик."""
     gray = load_gray(path)
     rows = []
     for name in names:
@@ -58,6 +67,7 @@ def process_image(path, names, cfg, out_dir, save_stages):
 
 
 def main(argv=None):
+    """Точка входу."""
     args = parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     try:

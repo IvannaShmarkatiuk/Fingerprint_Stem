@@ -1,3 +1,4 @@
+"""Метрики якості: MSE, PSNR, SSIM, збереження мінуцій, кутова похибка."""
 import numpy as np
 
 from fp.core import conv2d, gaussian_kernel
@@ -10,6 +11,7 @@ def _as_float(img):
 
 
 def mse(a, b):
+    """Середньоквадратична похибка між двома зображеннями однакового розміру."""
     a, b = _as_float(a), _as_float(b)
     if a.shape != b.shape:
         raise ValueError("Розміри зображень не збігаються")
@@ -17,6 +19,7 @@ def mse(a, b):
 
 
 def psnr(a, b, max_val=255.0):
+    """Пікове відношення сигнал/шум у дБ. Для однакових зображень повертає inf."""
     m = mse(a, b)
     if m == 0:
         return float("inf")
@@ -24,6 +27,10 @@ def psnr(a, b, max_val=255.0):
 
 
 def ssim(a, b, max_val=255.0, sigma=1.5):
+    """Індекс структурної подібності (Wang et al., 2004) з гаусовим вікном.
+
+    Повертає середнє значення карти SSIM по всьому зображенню.
+    """
     a, b = _as_float(a), _as_float(b)
     c1 = (0.01 * max_val) ** 2
     c2 = (0.03 * max_val) ** 2
@@ -38,6 +45,7 @@ def ssim(a, b, max_val=255.0, sigma=1.5):
 
 
 def pixel_agreement(mask_a, mask_b, roi=None):
+    """Частка пікселів, де дві бінарні маски збігаються (у межах ROI, якщо задано)."""
     eq = mask_a == mask_b
     if roi is not None:
         if not roi.any():
@@ -47,6 +55,11 @@ def pixel_agreement(mask_a, mask_b, roi=None):
 
 
 def minutiae_retention(reference, found, tol=8.0):
+    """Частка мінуцій еталона, для яких знайдено мінуцію того ж типу на відстані <= tol.
+
+    reference, found: списки кортежів (row, col, type).
+    Кожна знайдена мінуція може бути зіставлена лише один раз.
+    """
     if not reference:
         return 1.0 if not found else 0.0
     used = np.zeros(len(found), dtype=bool)
@@ -66,6 +79,7 @@ def minutiae_retention(reference, found, tol=8.0):
 
 
 def angle_error_deg(theta_a, theta_b, mask=None):
+    """Середня кутова похибка між двома полями орієнтацій (кути mod pi), у градусах."""
     d = np.abs(np.angle(np.exp(2j * (theta_a - theta_b)))) / 2
     if mask is not None:
         d = d[mask]

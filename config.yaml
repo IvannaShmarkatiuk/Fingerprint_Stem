@@ -1,3 +1,4 @@
+# Параметри програми. Змінюйте тут, а не в коді.
 seed: 42
 
 paths:
@@ -56,11 +57,12 @@ experiment:
     - {type: light, level: 30}
     - {type: light, level: 60}
     - {type: light, level: 90}
-
+  # порогові значення з ТЗ (критерій C1)
   thresholds:
     ssim: 0.70
     psnr: 20.0
     retention: 0.70
     orientation_deg: 5.0
     binary_agreement: 0.95
+  # сценарії, на які поширюються пороги (найважчі рівні - лише для аналізу)
   threshold_scenarios: [gaussian_10, gaussian_20, saltpepper_0.05]

@@ -1,3 +1,12 @@
+"""Порівняння швидкості наївних і оптимізованих реалізацій (ознака "нетривіальна оптимізація").
+
+    python benchmark.py
+
+Порівнюються:
+- фільтр Габора: цикли Python / 16 повних згорток / вибірка вікон по орієнтації;
+- скелетування Zhang-Suen: цикли по пікселях / векторизовані зсуви масивів.
+Перед вимірюванням кожна функція запускається один раз (прогрів).
+"""
 import csv
 import time
 from pathlib import Path
@@ -10,6 +19,7 @@ from fp.synthetic import synth_fingerprint
 
 
 def best_time(func, *args, repeat=3):
+    """Мінімальний час із repeat запусків після одного прогріву, секунди."""
     func(*args)
     times = []
     for _ in range(repeat):
@@ -20,6 +30,7 @@ def best_time(func, *args, repeat=3):
 
 
 def main():
+    """Запускає вимірювання і зберігає results/benchmark.csv."""
     img = synth_fingerprint(256, 224, seed=7)["image"]
     theta, _, _ = orientation_field(img)
     binary, _ = otsu_binarize(img)

@@ -1,8 +1,16 @@
+"""Базові операції над масивами: згортка, нормалізація, перетворення у відтінки сірого.
+
+Усі функції реалізовано вручну на numpy, без бібліотек комп'ютерного зору.
+"""
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
 
 def to_gray(img):
+    """Перетворює RGB або RGBA зображення у відтінки сірого (рекомендація ITU-R BT.601).
+
+    Сіре зображення повертається без змін (лише як float64).
+    """
     img = np.asarray(img, dtype=np.float64)
     if img.ndim == 2:
         return img
@@ -14,10 +22,15 @@ def to_gray(img):
 
 
 def to_uint8(img):
+    """Обрізає значення до діапазону [0, 255] і переводить у uint8."""
     return np.clip(np.rint(img), 0, 255).astype(np.uint8)
 
 
 def rescale(img, lo=0.0, hi=255.0):
+    """Лінійно розтягує значення масиву в діапазон [lo, hi].
+
+    Для сталого зображення (max == min) повертає масив, заповнений lo.
+    """
     img = np.asarray(img, dtype=np.float64)
     mn, mx = img.min(), img.max()
     if mx - mn < 1e-12:
@@ -26,6 +39,12 @@ def rescale(img, lo=0.0, hi=255.0):
 
 
 def conv2d(img, kernel, mode="reflect"):
+    """Двовимірна згортка (кореляція з перевернутим ядром) з доповненням країв.
+
+    Результат має той самий розмір, що й вхід. Реалізація векторизована:
+    будуються всі вікна розміру ядра, після чого виконується одне скалярне
+    множення через einsum.
+    """
     img = np.asarray(img, dtype=np.float64)
     kernel = np.asarray(kernel, dtype=np.float64)[::-1, ::-1]
     kh, kw = kernel.shape
@@ -36,6 +55,10 @@ def conv2d(img, kernel, mode="reflect"):
 
 
 def box_sum(img, size):
+    """Сума значень у квадратному вікні size x size навколо кожного пікселя.
+
+    Використовує інтегральне зображення, тому час не залежить від розміру вікна.
+    """
     img = np.asarray(img, dtype=np.float64)
     r = size // 2
     padded = np.pad(img, ((r + 1, r), (r + 1, r)), mode="reflect")
@@ -47,6 +70,7 @@ def box_sum(img, size):
 
 
 def gaussian_kernel(sigma):
+    """Нормоване гаусове ядро розміром 2*ceil(3*sigma)+1."""
     r = max(1, int(np.ceil(3 * sigma)))
     ax = np.arange(-r, r + 1, dtype=np.float64)
     g = np.exp(-(ax ** 2) / (2 * sigma ** 2))

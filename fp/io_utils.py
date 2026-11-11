@@ -1,3 +1,7 @@
+"""Завантаження та збереження зображень з обробкою крайових випадків.
+
+Pillow використовується лише для читання і запису файлів.
+"""
 import logging
 from pathlib import Path
 
@@ -17,6 +21,13 @@ class ImageLoadError(Exception):
 
 
 def load_gray(path):
+    """Читає файл і повертає сіре зображення float64 у діапазоні [0, 255].
+
+    Обробляє: порожні та пошкоджені файли, кольорові, 16-бітні та
+    однокольорові зображення, занадто малі розміри.
+    Raises:
+        ImageLoadError: якщо зображення неможливо обробити.
+    """
     path = Path(path)
     if not path.is_file():
         raise ImageLoadError(f"Файл не знайдено: {path}")
@@ -42,6 +53,7 @@ def load_gray(path):
 
 
 def list_images(folder):
+    """Повертає відсортований список файлів зображень у папці (рекурсивно)."""
     folder = Path(folder)
     if not folder.exists():
         return []
@@ -49,6 +61,7 @@ def list_images(folder):
 
 
 def save_image(img, path):
+    """Зберігає масив як 8-бітне сіре зображення. Булеві маски: True = чорна лінія."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if img.dtype == bool:

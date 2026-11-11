@@ -1,9 +1,14 @@
+"""Завантаження конфігурації з YAML та перевизначення параметрів з командного рядка."""
 import copy
 
 import yaml
 
 
 def load_config(path, overrides=None):
+    """Читає YAML і застосовує перевизначення виду "p1.gabor.sigma_y=5".
+
+    Значення після "=" розбирається як YAML (числа, true/false, списки).
+    """
     with open(path, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     cfg = copy.deepcopy(cfg)
@@ -16,6 +21,7 @@ def load_config(path, overrides=None):
 
 
 def set_by_path(cfg, dotted, value):
+    """Встановлює вкладений параметр за шляхом через крапку."""
     parts = dotted.split(".")
     node = cfg
     for p in parts[:-1]:

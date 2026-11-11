@@ -1,3 +1,12 @@
+"""Експерименти для порівняння пайплайнів.
+
+    python experiment.py robustness   # стійкість до шуму (C1, B2), будь-яка вибірка
+    python experiment.py groundtruth  # точність на синтетичних еталонах (C1)
+    python experiment.py sweep        # підбір параметрів (обґрунтування в звіті)
+    python experiment.py figures      # ілюстрації стадій для звіту
+
+Результати: CSV, JSON і PNG у папці results/experiments.
+"""
 import argparse
 import csv
 import json
@@ -24,11 +33,13 @@ LABELS = {"p1": "П1 Габор", "p2": "П2 Фур'є"}
 
 
 def scenario_name(spec):
+    """Назва сценарію спотворення, напр. gaussian_20."""
     level = spec["level"]
     return f"{spec['type']}_{int(level) if float(level).is_integer() else level}"
 
 
 def write_csv(rows, path):
+    """Зберігає список словників у CSV."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
         return
@@ -39,6 +50,7 @@ def write_csv(rows, path):
 
 
 def robustness(cfg, files, out):
+    """Запускає кожен пайплайн на чистому і спотворених зображеннях та порівнює результати."""
     exp = cfg["experiment"]
     thr = exp["thresholds"]
     rows = []
@@ -98,6 +110,7 @@ def robustness(cfg, files, out):
 
 
 def plot_robustness(rows, degradations, path):
+    """Графіки SSIM і збереження мінуцій від рівня спотворення для кожного типу."""
     types = sorted({d["type"] for d in degradations})
     fig, axes = plt.subplots(2, len(types), figsize=(4.2 * len(types), 7), squeeze=False)
     titles = {"gaussian": "Гаусів шум, σ", "saltpepper": "Імпульсний шум, частка",
@@ -125,6 +138,7 @@ def plot_robustness(rows, degradations, path):
 
 
 def groundtruth(cfg, gt_dir, out):
+    """Порівнює результати з відомими еталонами синтетичних відбитків."""
     thr = cfg["experiment"]["thresholds"]
     rows = []
     for gt_path in sorted(Path(gt_dir).glob("*_gt.npz")):
@@ -166,6 +180,11 @@ SWEEPS = {
 
 
 def sweep(cfg, gt_dir, out):
+    """Перебирає значення одного параметра за раз; оцінка - збіг з еталоном при шумі σ=20.
+
+    Для підбору використовуються окремі синтетичні відбитки (не ті, що в groundtruth),
+    щоб параметри не "підганялися" під тестові дані.
+    """
     rows = []
     gts = sorted(Path(gt_dir).glob("*_gt.npz"))
     for key, values in SWEEPS.items():
@@ -209,6 +228,7 @@ def _get(cfg, dotted):
 
 
 def figures(cfg, files, out):
+    """Зберігає для кожного з перших файлів рисунок з усіма стадіями обох пайплайнів."""
     for path in files:
         gray = load_gray(path)
         fig, axes = plt.subplots(len(NAMES), 6, figsize=(16, 3 * len(NAMES)))
@@ -233,6 +253,7 @@ def figures(cfg, files, out):
 
 
 def main(argv=None):
+    """Точка входу."""
     ap = argparse.ArgumentParser(description="Експерименти порівняння пайплайнів")
     ap.add_argument("mode", choices=["robustness", "groundtruth", "sweep", "figures"])
     ap.add_argument("--config", default="config.yaml")

@@ -1,3 +1,12 @@
+"""Генератор синтетичних відбитків з відомою правильною відповіддю (еталони для C1).
+
+Ідея як у SFinGe (Cappelli, Maio, Maltoni): поле орієнтацій задається моделлю
+"нулів і полюсів" (Sherlock & Monro, 1993) з одним ядром (core) і дельтою,
+потім випадковий шум багато разів фільтрується орієнтованим фільтром Габора
+з насиченням. З шуму виростають папілярні лінії з природними закінченнями
+та розгалуженнями. Оскільки орієнтація і "чиста" маска ліній відомі заздалегідь,
+ними можна перевіряти, чи правильно працюють методи.
+"""
 import numpy as np
 
 from fp.core import conv2d, gaussian_kernel
@@ -5,6 +14,7 @@ from fp.methods.gabor import gabor_filter
 
 
 def zero_pole_orientation(h, w, cores, deltas, base=0.0):
+    """Напрям ліній theta(x, y) за моделлю Sherlock-Monro, радіани [0, pi)."""
     y, x = np.mgrid[0:h, 0:w]
     z = x + 1j * y
     theta = np.full((h, w), base)
@@ -16,6 +26,7 @@ def zero_pole_orientation(h, w, cores, deltas, base=0.0):
 
 
 def ellipse_mask(h, w, margin=0.08):
+    """Еліптична маска форми подушечки пальця."""
     y, x = np.mgrid[0:h, 0:w]
     cy, cx = h / 2, w / 2
     ry, rx = h * (0.5 - margin), w * (0.5 - margin)
@@ -23,6 +34,16 @@ def ellipse_mask(h, w, margin=0.08):
 
 
 def synth_fingerprint(h=256, w=224, freq=1 / 9, seed=0, iterations=12):
+    """Генерує синтетичний відбиток.
+
+    Returns:
+        dict з ключами:
+            image - сіре зображення 0..255 (лінії темні, фон білий);
+            theta - правильне поле орієнтацій;
+            ridges - правильна маска ліній (True = лінія);
+            roi - маска області відбитка;
+            freq - частота ліній.
+    """
     rng = np.random.default_rng(seed)
     core = (h * rng.uniform(0.35, 0.45), w * rng.uniform(0.4, 0.6))
     delta = (h * rng.uniform(0.75, 0.85), w * rng.uniform(0.2, 0.8))
@@ -47,6 +68,7 @@ def synth_fingerprint(h=256, w=224, freq=1 / 9, seed=0, iterations=12):
 
 
 def smooth_field(h, w, cells, rng):
+    """Плавне випадкове поле 0..1: випадкова сітка cells x cells з білінійною інтерполяцією."""
     grid = rng.random((cells, cells))
     gy = np.linspace(0, cells - 1, h)
     gx = np.linspace(0, cells - 1, w)
@@ -55,6 +77,7 @@ def smooth_field(h, w, cells, rng):
 
 
 def stripes(h, w, angle, freq):
+    """Паралельні смуги з напрямом ліній angle (для простих тестів орієнтації)."""
     y, x = np.mgrid[0:h, 0:w]
     a = angle - np.pi / 2
     u = x * np.cos(a) + y * np.sin(a)

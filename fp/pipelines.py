@@ -1,3 +1,12 @@
+"""Два пайплайни обробки відбитка. Кожна стадія - метод з іншої категорії.
+
+П1 "Габор":  CLAHE -> фільтр Габора за полем орієнтацій -> Оцу -> Zhang-Suen -> мінуції
+П2 "Фур'є":  ROI за дисперсією + нормалізація -> FFT-підсилення -> Sauvola
+             -> відкриття + скелетування -> мінуції
+
+Кожен пайплайн повертає PipelineResult зі словником проміжних результатів,
+щоб програма могла зберегти вихід кожної стадії.
+"""
 import time
 from dataclasses import dataclass, field
 
@@ -18,6 +27,7 @@ from fp.methods.sauvola import sauvola_binarize
 
 @dataclass
 class PipelineResult:
+    """Результат запуску пайплайна."""
     name: str
     stages: dict = field(default_factory=dict)   # назва стадії -> зображення/маска
     enhanced: np.ndarray = None                   # сіре підсилене зображення (для метрик)
@@ -37,6 +47,7 @@ def _timed(res, name, func, *args, **kwargs):
 
 
 def _gabor_stage(img, cfg):
+    """Стадія 2 П1: поле орієнтацій, частота, фільтр Габора, маска надійних ділянок."""
     theta, coherence, energy = orientation_field(img, cfg["orient_window"], cfg["orient_smooth"])
     freq = cfg["freq"]
     if cfg.get("estimate_freq", True):
@@ -56,6 +67,7 @@ def _gabor_stage(img, cfg):
 
 
 def run_p1(gray, cfg):
+    """П1: CLAHE -> Габор -> Оцу -> Zhang-Suen -> мінуції."""
     res = PipelineResult("P1")
     c = cfg["p1"]
     eq = _timed(res, "1_clahe", clahe, gray, c["clahe"]["tiles"], c["clahe"]["clip_limit"])
@@ -80,6 +92,7 @@ def run_p1(gray, cfg):
 
 
 def run_p2(gray, cfg):
+    """П2: ROI + нормалізація -> FFT-підсилення -> Sauvola -> відкриття + скелет -> мінуції."""
     res = PipelineResult("P2")
     c = cfg["p2"]
     r = c["roi"]
@@ -117,10 +130,12 @@ PIPELINES = {"p1": run_p1, "p2": run_p2}
 
 
 def run_pipeline(name, gray, cfg):
+    """Запускає пайплайн за назвою ("p1" або "p2")."""
     if name not in PIPELINES:
         raise ValueError(f"Невідомий пайплайн: {name}. Доступні: {', '.join(PIPELINES)}")
     return PIPELINES[name](np.asarray(gray, dtype=np.float64), cfg)
 
 
 def enhanced_view(res):
+    """Підсилене зображення як 0..255 для збереження."""
     return rescale(res.enhanced)

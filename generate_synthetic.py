@@ -1,3 +1,9 @@
+"""Генерує синтетичні відбитки з еталонами (правильна орієнтація, маска ліній, ROI).
+
+    python generate_synthetic.py --count 10 --out data/synthetic
+
+Для кожного відбитка зберігається PNG і файл .npz з правильними відповідями.
+"""
 import argparse
 from pathlib import Path
 
@@ -8,6 +14,7 @@ from fp.synthetic import synth_fingerprint
 
 
 def main(argv=None):
+    """Точка входу."""
     ap = argparse.ArgumentParser(description="Генерація синтетичних відбитків-еталонів")
     ap.add_argument("--count", type=int, default=10)
     ap.add_argument("--out", default="data/synthetic")
